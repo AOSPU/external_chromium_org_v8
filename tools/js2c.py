@@ -37,6 +37,14 @@ import jsmin
 import bz2
 import textwrap
 
+try:
+  from functools import reduce
+except ImportError:
+  pass
+
+if not hasattr(__builtins__, "xrange"):
+  xrange = range
+
 
 class Error(Exception):
   def __init__(self, msg):
@@ -368,7 +376,7 @@ def PrepareSources(source_files):
     An instance of Sources.
   """
   macro_file = None
-  macro_files = filter(IsMacroFile, source_files)
+  macro_files = list(filter(IsMacroFile, source_files))
   assert len(macro_files) in [0, 1]
   if macro_files:
     source_files.remove(macro_files[0])
@@ -414,7 +422,7 @@ def BuildMetadata(sources, source_bytes, native_type, omit):
   raw_sources = "".join(sources.modules)
 
   # The sources are expected to be ASCII-only.
-  assert not filter(lambda value: ord(value) >= 128, raw_sources)
+  assert not [value for value in raw_sources if ord(value) >= 128]
 
   # Loop over modules and build up indices into the source blob:
   get_index_cases = []
